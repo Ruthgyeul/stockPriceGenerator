@@ -1,0 +1,42 @@
+{
+  "name": "stock-price-generator",
+  "description": "A package for generating synthetic stock price data using various random algorithm models",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "prepare": "npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ruthgyeul/stockPriceGenerator.git"
+  },
+  "author": "Ruthgyeul",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Ruthgyeul/stockPriceGenerator.git/issues"
+  },
+  "homepage": "https://github.com/Ruthgyeul/stockPriceGenerator.git#readme",
+  "keywords": [
+    "stock",
+    "price",
+    "generator",
+    "simulation",
+    "GBM",
+    "random-walk",
+    "finance"
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.24",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.2",
+    "typescript": "^5.3.3"
+  }
+}
