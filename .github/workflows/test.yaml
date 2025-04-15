@@ -7,7 +7,7 @@ on:
       - develop
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +22,7 @@ jobs:
         run: npm ci
 
       - name: Run Build
-        run: npm build
+        run: npm run build
 
       - name: Run Tests
-        run: npm test
+        run: npm run test
