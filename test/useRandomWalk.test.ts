@@ -82,11 +82,11 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
         const result = getStockPrices({
             ...defaultOptions,
             min: 9000,
-            max: 11000
+            max: 12000
         });
 
         expect(Math.min(...result.data)).toBeGreaterThanOrEqual(9000);
-        expect(Math.max(...result.data)).toBeLessThanOrEqual(11000);
+        expect(Math.max(...result.data)).toBeLessThanOrEqual(12000);
     });
 
     test('should truncate or pad output to specified length', () => {
@@ -216,7 +216,7 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
     });
 
     test('should use provided data array as base', () => {
-        const inputData = [100, 110, 120];
+        const inputData = [10000, 11000, 12000];
         const result = getStockPrices({ ...defaultOptions, data: inputData });
         expect(result.data.slice(0, 3)).toEqual(inputData);
     });
