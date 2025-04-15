@@ -154,7 +154,7 @@ describe('GBM Algorithm - Stock Price Generator', () => {
     });
 
     test('should use provided data array as base', () => {
-        const inputData = [100, 110, 120];
+        const inputData = [10000, 11000, 12000];
         const result = getStockPrices({ ...defaultOptions, data: inputData });
         expect(result.data.slice(0, 3)).toEqual(inputData);
     });
