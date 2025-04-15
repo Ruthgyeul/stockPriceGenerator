@@ -19,7 +19,7 @@ npm install stockprice-generator
 
 ### ES Modules
 ```javascript
-import { getStockPrices, getContStockPrices } from 'stock-price-generator';
+import { getStockPrices, getContStockPrices } from 'stockprice-generator';
 
 // Generate an array of stock prices
 const result = getStockPrices({
@@ -36,7 +36,7 @@ console.log(result.price); // Current price (last price in the array)
 
 ### CommonJS
 ```javascript
-const { getStockPrices, getContStockPrices } = require('stock-price-generator');
+const { getStockPrices, getContStockPrices } = require('stockprice-generator');
 
 // Generate an array of stock prices
 const result = getContStockPrices({
@@ -53,7 +53,7 @@ console.log(result.price); // Current price (last price in the array)
 
 ### Continuous Generation (ES Modules)
 ```javascript
-import { getStockPrices } from 'stock-price-generator';
+import { getStockPrices } from 'stockprice-generator';
 
 // Create a continuous generator that emits prices every 60 seconds
 const generator = getStockPrices({
@@ -79,7 +79,7 @@ console.log(`Current price: ${generator.getCurrentPrice()}`);
 
 ### Continuous Generation (CommonJS)
 ```javascript
-const { getContStockPrices } = require('stock-price-generator');
+const { getContStockPrices } = require('stockprice-generator');
 
 // Create a continuous generator that emits prices every 60 seconds
 const generator = getContStockPrices({
