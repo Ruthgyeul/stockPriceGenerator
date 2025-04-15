@@ -1,8 +1,9 @@
 ---
 name: Pull Request 
 about: Pull request to merge into upper branch
-title: '{Type}: {title}'
-assignees: Ruthgyeul
+assignees:
+  - Ruthgyeul
+  - Copliot
 
 ---
 
