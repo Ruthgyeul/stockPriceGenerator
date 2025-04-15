@@ -15,7 +15,7 @@
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "verbatimModuleSyntax": true,
+    "verbatimModuleSyntax": false,
     "declarationMap": true
   },
   "include": ["./src/**/*.ts"],
