@@ -1,4 +1,4 @@
-export interface AlgorithmOptions {
+export interface AlgorithmParams {
     currentPrice: number;
     volatility: number;
     drift: number;

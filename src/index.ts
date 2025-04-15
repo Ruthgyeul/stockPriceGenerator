@@ -3,9 +3,9 @@ import { algorithms, Algorithm as AlgorithmType } from './utils/algorithm/algori
 
 class StockPriceGeneratorImpl implements StockPriceGenerator {
   private currentPrice: number;
-  private interval: number;
+  private readonly interval: number;
   private timer: ReturnType<typeof setInterval> | null;
-  private options: StockPriceOptions;
+  private readonly options: StockPriceOptions;
 
   constructor(options: StockPriceOptions) {
     this.options = {

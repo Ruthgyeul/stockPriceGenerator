@@ -1,9 +1,14 @@
-import { AlgorithmOptions } from './algorithmOptions';
+import { AlgorithmParams } from './algorithmParams';
 import { seededRandom } from '../seed';
 
-export function RandomWalk({ currentPrice, volatility, drift, seed }: AlgorithmOptions): number {
+export function RandomWalk({ currentPrice, volatility, drift, seed }: AlgorithmParams): number {
     const random = seededRandom(seed);
-    const change = (random - 0.5) * volatility * 0.1; // Reduce the impact of volatility
-    const driftEffect = drift * (1 / 365); // Daily drift
-    return currentPrice * (1 + change + driftEffect);
+    const epsilon = (random - 0.5) * 2; // scale to [-1, 1]
+    const dt = 1 / 365;
+
+    const driftTerm = (drift - 0.5 * volatility ** 2) * dt;
+    const diffusionTerm = volatility * Math.sqrt(dt) * epsilon;
+
+    const nextPrice = currentPrice * Math.exp(driftTerm + diffusionTerm);
+    return nextPrice;
 }
