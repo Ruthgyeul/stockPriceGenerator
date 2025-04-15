@@ -32,4 +32,4 @@ export interface StockPriceGenerator {
   start: () => void;
   stop: () => void;
   getCurrentPrice: () => number;
-} 
+}
