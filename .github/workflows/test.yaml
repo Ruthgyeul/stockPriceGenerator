@@ -7,7 +7,7 @@ on:
       - develop
 
 jobs:
-  build-and-test:
+  Build & Test:
     runs-on: ubuntu-latest
 
     steps:
