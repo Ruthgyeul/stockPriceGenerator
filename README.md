@@ -12,7 +12,7 @@ Generates synthetic stock price data using various random algorithm models. The 
 
 ```bash
 # Using npm
-npm install stock-price-generator
+npm install stockprice-generator
 ```
 
 ## Usage
