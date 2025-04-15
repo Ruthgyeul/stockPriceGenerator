@@ -19,9 +19,10 @@
   ],
   "scripts": {
     "build": "tsup",
-    "build2": "----use-above----npm run build:cjs && npm run build:esm",
+    "build:alt": "npm run build:cjs && npm run build:esm",
     "build:cjs": "tsc -p tsconfig.cjs.json",
     "build:esm": "tsc -p tsconfig.esm.json",
+    "build:test": "npm run build && jest",
     "test": "jest",
     "test:w": "jest --watch",
     "prepare": "npm run build"
