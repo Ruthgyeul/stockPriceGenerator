@@ -3,8 +3,7 @@ name: Pull Request
 about: Pull request to merge into upper branch
 assignees:
   - Ruthgyeul
-  - Copliot
-
+  - Copilot
 ---
 
 # Related Issue
