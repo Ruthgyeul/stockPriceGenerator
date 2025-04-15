@@ -1,4 +1,4 @@
-import { AlgorithmParams } from './algorithmParams';
+import type { AlgorithmParams } from './algorithmParams';
 import { seededRandom } from '../seed';
 
 export function RandomWalk({ currentPrice, volatility, drift, seed }: AlgorithmParams): number {

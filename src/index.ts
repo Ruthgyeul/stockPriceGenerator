@@ -1,5 +1,6 @@
-import { StockPriceOptions, StockPriceResult, StockPriceGenerator } from './types';
-import { algorithms, Algorithm as AlgorithmType } from './utils/algorithm/algorithms';
+import type { StockPriceOptions, StockPriceResult, StockPriceGenerator } from './types';
+import { algorithms } from './utils/algorithm/algorithms';
+import type { Algorithm as AlgorithmType } from './utils/algorithm/algorithms';
 
 class StockPriceGeneratorImpl implements StockPriceGenerator {
   private currentPrice: number; // Current stock price
@@ -22,7 +23,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
   generateNextPrice(): number {
     const { volatility = 0.1, drift = 0.05, algorithm = 'RandomWalk', seed } = this.options;
-    
+
     if (volatility < 0) {
       throw new Error('Volatility must be a non-negative number');
     }
@@ -38,9 +39,9 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
   start(): void {
     if (this.timer) return;
-    
+
     this.options.onStart?.();
-    
+
     this.timer = setInterval(() => {
       try {
         this.currentPrice = this.generateNextPrice();
@@ -88,4 +89,4 @@ export function getContStockPrices(options: StockPriceOptions): StockPriceGenera
   return new StockPriceGeneratorImpl(options);
 }
 
-export * from './types'; 
+export * from './types';

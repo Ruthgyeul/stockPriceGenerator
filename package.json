@@ -1,9 +1,16 @@
 {
   "name": "stockprice-generator",
   "description": "A package for generating synthetic stock price data using various random algorithm models",
-  "version": "0.0.10",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "0.0.13",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
   "files": [
     "dist",
     "package.json",
@@ -20,7 +27,7 @@
     "type": "git",
     "url": "git+https://github.com/Ruthgyeul/stockPriceGenerator.git"
   },
-  "author": "Ruthgyeul",
+  "author": "Ruthgyeul (https://github.com/Ruthgyeul)",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Ruthgyeul/stockPriceGenerator.git/issues"

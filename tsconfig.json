@@ -1,7 +1,11 @@
 {
   "compilerOptions": {
-    "target": "es2022",
+    "target": "es2024",
     "module": "esnext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "noEmit": false,
+    "isolatedModules": true,
     "declaration": true,
     "outDir": "./dist",
     "strict": true,
@@ -10,8 +14,10 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node",
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "verbatimModuleSyntax": true,
+    "declarationMap": true
   },
-  "include": ["src"],
+  "include": ["./src/**/*.ts"],
   "exclude": ["node_modules", "dist", "test"]
 }

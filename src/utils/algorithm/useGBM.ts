@@ -1,4 +1,4 @@
-import { AlgorithmParams } from './algorithmParams';
+import type { AlgorithmParams } from './algorithmParams';
 import { seededRandom } from '../seed';
 
 export function GBM({ currentPrice, volatility, drift, seed = (Date.now() + new Date().getMilliseconds()) }: AlgorithmParams): number {

@@ -1,4 +1,4 @@
-import { Algorithm } from './utils/algorithm/algorithms';
+import type { Algorithm } from './utils/algorithm/algorithms';
 
 export type DataType = 'float' | 'int';
 
