@@ -54,7 +54,7 @@ describe('Stock Price Generator', () => {
         ...defaultOptions,
         days: 30,
         startPrice: 10000,
-        volatility: 0.1,  // Reduced from 0.5 to 0.1 for more reasonable price movements
+        volatility: 0.1,
         drift: 0,
         seed: 12345
       });

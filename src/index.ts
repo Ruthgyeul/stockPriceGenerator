@@ -2,10 +2,10 @@ import { StockPriceOptions, StockPriceResult, StockPriceGenerator } from './type
 import { algorithms, Algorithm as AlgorithmType } from './utils/algorithm/algorithms';
 
 class StockPriceGeneratorImpl implements StockPriceGenerator {
-  private currentPrice: number;
-  private readonly interval: number;
-  private timer: ReturnType<typeof setInterval> | null;
-  private readonly options: StockPriceOptions;
+  private currentPrice: number; // Current stock price
+  private readonly interval: number; // Interval in milliseconds
+  private timer: ReturnType<typeof setInterval> | null; // Timer ID
+  private readonly options: StockPriceOptions; // Options for the generator
 
   constructor(options: StockPriceOptions) {
     this.options = {
