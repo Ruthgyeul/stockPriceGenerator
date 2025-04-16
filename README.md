@@ -23,10 +23,13 @@ const { getStockPrices, getContStockPrices } = require('stockprice-generator');
 
 // Generate an array of stock prices
 const result = getContStockPrices({
-    startPrice: 10000,
+    startPrice: 10000, // required
     length: 100,
     volatility: 0.1,
     drift: 0.05,
+    min: 5000,
+    max: 15000,
+    dataType: 'int',
     algorithm: 'RandomWalk'
 });
 
@@ -40,10 +43,13 @@ import { getStockPrices, getContStockPrices } from 'stockprice-generator';
 
 // Generate an array of stock prices
 const result = getStockPrices({
-    startPrice: 10000,
+    startPrice: 10000, // required
     length: 100,
     volatility: 0.1,
     drift: 0.05,
+    min: 5000,
+    max: 15000,
+    dataType: 'int',
     algorithm: 'RandomWalk'
 });
 
@@ -57,13 +63,16 @@ const { getContStockPrices } = require('stockprice-generator');
 
 // Create a continuous generator that emits prices every 60 seconds
 const generator = getContStockPrices({
-    startPrice: 10000,
+    startPrice: 10000, // required
     volatility: 0.1,
     drift: 0.05,
+    min: 5000,
+    max: 15000,
+    dataType: 'int',
     algorithm: 'RandomWalk',
     interval: 60000, // 60 seconds
-    onPrice: (price) => {
-        console.log(`New price: ${price}`);
+    onPrice: (price, previousPrice) => {
+        console.log(`New: ${price} | Previous: ${previousPrice}`);
     }
 });
 
@@ -83,13 +92,16 @@ import { getStockPrices } from 'stockprice-generator';
 
 // Create a continuous generator that emits prices every 60 seconds
 const generator = getStockPrices({
-    startPrice: 10000,
+    startPrice: 10000, // required
     volatility: 0.1,
     drift: 0.05,
+    min: 5000,
+    max: 15000,
+    dataType: 'int',
     algorithm: 'RandomWalk',
-    interval: 60000, // 60 seconds
-    onPrice: (price: number) => {
-        console.log(`New price: ${price}`);
+    interval: 1000, // 1 seconds
+    onPrice: (price, previousPrice) => {
+        console.log(`New: ${price} | Previous: ${previousPrice}`);
     }
 });
 
@@ -105,30 +117,38 @@ console.log(`Current price: ${generator.getCurrentPrice()}`);
 
 ## Parameters
 
-| Parameter    | Required | Type            | Default | Description                                                       |
-|--------------|----------|-----------------|--------|-------------------------------------------------------------------|
-| `startPrice` | Yes      | number          | -      | Initial price of the stock                                        |
-| `length`     | No       | number          | 100    | Length of the output array                                        |
-| `volatility` | No       | number          | 0.1    | Volatility of the stock price (standard deviation of the returns) |
-| `drift`      | No       | number          | 0.05   | The drift of the stock price (mean of the returns)                |
-| `seed`       | No       | number          | DateTime | Seed for random number generation (for reproducibility)           |
-| `min`        | No       | number          | 0      | Minimum price for the stock (min >= 0)                            |
-| `max`        | No       | number          | 10000  | Maximum price for the stock (max >= 0)                            |
-| `delisting`  | No       |boolean|false| Keep stock price to 0, if it reaches to 0                         |
-| `step`       | No       | number          | -      | Step size for discretization                                      |
-| `dataType`   | No       | float \| int    | float  | Type of the output data type                                      |
-| `algorithm`  | No       | RandomWalk \| GBM | RandomWalk  | Algorithm for generating the random number                        |
+| Parameter    | Type              | Default    | Description                                                       |
+|--------------|-------------------|------------|-------------------------------------------------------------------|
+| `startPrice` | number            | -          | [Required] Initial price of the stock                             |
+| `length`     | number            | 100        | Length of the output array                                        |
+| `volatility` | number            | 0.1        | Volatility of the stock price (standard deviation of the returns) |
+| `drift`      | number            | 0.05       | The drift of the stock price (mean of the returns)                |
+| `seed`       | number            | -          | Seed for random number generation (for reproducibility)           |
+| `min`        | number            | -          | Minimum price for the stock (min > 0)                             |
+| `max`        | number            | -          | Maximum price for the stock (max > 0)                             |
+| `delisting`  | boolean           | false      | Keep stock price to 0, if it reaches to 0                         |
+| `step`       | number            | -          | Step size for discretization                                      |
+| `dataType`   | float \| int      | float      | Type of the output data type                                      |
+| `algorithm`  | RandomWalk \| GBM | RandomWalk | Algorithm for generating the random number                        |
 
 ## Handler Functions (only for continuous generation)
 
-| Parameter | Required | Type | Default  | Description                                                              |
-|-----------|----------|------|----------|--------------------------------------------------------------------------|
-| `interval` | Yes      | number | 60000    | Interval in milliseconds between price updates in continuous generation  |
-| `onStart` | No       | function | -        | Callback function to handle generator start event                        |
-| `onPrice` | No       | function | -        | Callback function to handle new prices in continuous generation          |
-| `onStop` | No       | function | -        | Callback function to handle generator stop event                         |
-| `onComplete` | No       | function | -        | Callback function to handle generator completion event                   |
-| `onError` | No       | function | -        | Callback function to handle errors in continuous generation              |
+| Parameter    | Type     | Default  | Description                                                             |
+|--------------|----------|----------|-------------------------------------------------------------------------|
+| `interval`   | number   | 60000    | Interval in milliseconds between price updates in continuous generation |
+| `onStart`    | function | -        | Callback function to handle generator start event                       |
+| `onPrice`    | function | -        | Callback function to handle new prices in continuous generation         |
+| `onStop`     | function | -        | Callback function to handle generator stop event                        |
+| `onComplete` | function | -        | Callback function to handle generator completion event                  |
+| `onError`    | function | -        | Callback function to handle errors in continuous generation             |
+
+# Example Output
+```javascript
+[1000, 1002.59, 1023.62, 1006.69, 1029.67, 1012.96]
+```
+
+# RandomWalk Output Graph
+![RandomWalk](https://raw.githubusercontent.com/Ruthgyeul/stockPriceGenerator/main/examples/randomwalk.png)
 
 ## License
 MIT
