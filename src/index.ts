@@ -22,19 +22,30 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
   }
 
   generateNextPrice(): number {
-    const { volatility = 0.1, drift = 0.05, algorithm = 'RandomWalk', seed } = this.options;
+    const { volatility = 0.1, drift = 0.05, algorithm = 'RandomWalk', seed, step } = this.options;
 
     if (volatility < 0) {
       throw new Error('Volatility must be a non-negative number');
     }
 
     const selectedAlgorithm = algorithms[algorithm as AlgorithmType];
-    return selectedAlgorithm({
+    let nextPrice = selectedAlgorithm({
       currentPrice: this.currentPrice,
       volatility,
       drift,
-      seed
+      seed,
+      min: this.options.min ?? 0,
+      max: this.options.max ?? 0,
+      delisting: this.options.delisting ?? false,
+      dataType: this.options.dataType ?? 'float'
     });
+
+    // Apply step size discretization if specified
+    if (step && step > 0) {
+      nextPrice = Math.round(nextPrice / step) * step;
+    }
+
+    return nextPrice;
   }
 
   start(): void {
@@ -52,11 +63,32 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
     }, this.interval);
   }
 
+  pause(): void {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  continue(): void {
+    if (this.timer) return;
+
+    this.timer = setInterval(() => {
+      try {
+        this.currentPrice = this.generateNextPrice();
+        this.options.onPrice?.(this.currentPrice);
+      } catch (error) {
+        this.options.onError?.(error as Error);
+      }
+    }, this.interval);
+  }
+
   stop(): void {
     if (this.timer) {
       clearInterval(this.timer);
       this.timer = null;
       this.options.onStop?.();
+      this.options.onComplete?.();
     }
   }
 
@@ -66,11 +98,11 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 }
 
 export function getStockPrices(options: StockPriceOptions): StockPriceResult {
-  const { startPrice, days = 100, algorithm = 'RandomWalk' } = options;
+  const { startPrice, length = 100, step } = options;
   const data: number[] = [startPrice];
   let currentPrice = startPrice;
 
-  for (let i = 1; i < days; i++) {
+  for (let i = 1; i < length; i++) {
     const generator = new StockPriceGeneratorImpl({
       ...options,
       startPrice: currentPrice

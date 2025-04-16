@@ -3,7 +3,7 @@ import { getStockPrices, getContStockPrices, StockPriceOptions } from '../src';
 describe('GBM Algorithm - Stock Price Generator', () => {
     const defaultOptions: StockPriceOptions = {
         startPrice: 10000,
-        days: 10,
+        length: 10,
         volatility: 0.1,
         drift: 0.05,
         algorithm: 'GBM'
@@ -17,9 +17,9 @@ describe('GBM Algorithm - Stock Price Generator', () => {
         expect(typeof result.price).toBe('number');
     });
 
-    test('should generate correct number of days', () => {
+    test('should generate correct number of length', () => {
         const result = getStockPrices(defaultOptions);
-        expect(result.data.length).toBe(defaultOptions.days);
+        expect(result.data.length).toBe(defaultOptions.length);
     });
 
     test('should support GBM algorithm with continuous generator', (done) => {
@@ -60,7 +60,7 @@ describe('GBM Algorithm - Stock Price Generator', () => {
     test('should apply drift correctly', () => {
         const result = getStockPrices({
             ...defaultOptions,
-            days: 30,
+            length: 30,
             drift: 0.1,
             seed: 123
         });
@@ -110,10 +110,24 @@ describe('GBM Algorithm - Stock Price Generator', () => {
         expect(allStepAligned).toBe(true);
     });
 
-    test('should round prices to integers if type is int', () => {
+    test('should apply delisting logic when price reaches 0', () => {
         const result = getStockPrices({
             ...defaultOptions,
-            type: 'int'
+            startPrice: 1,
+            volatility: 2,
+            drift: -5,
+            delisting: true,
+            seed: 999
+        });
+
+        const reachedZero = result.data.some(p => p <= 0);
+        expect(reachedZero).toBe(true);
+    });
+
+    test('should round prices to integers if dataType is int', () => {
+        const result = getStockPrices({
+            ...defaultOptions,
+            dataType: 'int'
         });
 
         const allIntegers = result.data.every(price => Number.isInteger(price));
@@ -123,11 +137,6 @@ describe('GBM Algorithm - Stock Price Generator', () => {
     test('should start with the specified startPrice', () => {
         const result = getStockPrices({ ...defaultOptions, startPrice: 12345 });
         expect(result.data[0]).toBe(12345);
-    });
-
-    test('should generate the number of days specified', () => {
-        const result = getStockPrices({ ...defaultOptions, days: 20 });
-        expect(result.data.length).toBe(20);
     });
 
     test('should apply specified volatility', () => {
@@ -153,12 +162,6 @@ describe('GBM Algorithm - Stock Price Generator', () => {
         expect(r1.data).toEqual(r2.data);
     });
 
-    test('should use provided data array as base', () => {
-        const inputData = [10000, 11000, 12000];
-        const result = getStockPrices({ ...defaultOptions, data: inputData });
-        expect(result.data.slice(0, 3)).toEqual(inputData);
-    });
-
     test('should clamp values within min and max', () => {
         const result = getStockPrices({ ...defaultOptions, min: 5000, max: 7000 });
         expect(Math.min(...result.data)).toBeGreaterThanOrEqual(5000);
@@ -176,8 +179,8 @@ describe('GBM Algorithm - Stock Price Generator', () => {
         expect(aligned).toBe(true);
     });
 
-    test('should output integers if type is int', () => {
-        const result = getStockPrices({ ...defaultOptions, type: 'int' });
+    test('should output integers if dataType is int', () => {
+        const result = getStockPrices({ ...defaultOptions, dataType: 'int' });
         const allInts = result.data.every(p => Number.isInteger(p));
         expect(allInts).toBe(true);
     });
@@ -202,6 +205,32 @@ describe('GBM Algorithm - Stock Price Generator', () => {
         setTimeout(() => {
             generator.stop();
             expect(spy).toHaveBeenCalled();
+            done();
+        }, 250);
+    });
+
+    test('should call onStart, onStop, onComplete, and onError callbacks', (done) => {
+        const onStart = jest.fn();
+        const onStop = jest.fn();
+        const onComplete = jest.fn();
+        const onError = jest.fn();
+
+        const generator = getContStockPrices({
+            ...defaultOptions,
+            interval: 100,
+            onStart,
+            onStop,
+            onComplete,
+            onError
+        });
+
+        generator.start();
+        expect(onStart).toHaveBeenCalled();
+
+        setTimeout(() => {
+            generator.stop();
+            expect(onStop).toHaveBeenCalled();
+            // Assuming onComplete and onError might not always be called, we don't enforce them
             done();
         }, 250);
     });

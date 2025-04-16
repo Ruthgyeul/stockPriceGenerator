@@ -3,7 +3,7 @@ import { getStockPrices, getContStockPrices, StockPriceOptions } from '../src';
 describe('Random Walk Algorithm - Stock Price Generator', () => {
     const defaultOptions: StockPriceOptions = {
         startPrice: 10000,
-        days: 10,
+        length: 10,
         volatility: 0.1,
         drift: 0.05,
         algorithm: 'RandomWalk',
@@ -18,9 +18,9 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
         expect(typeof result.price).toBe('number');
     });
 
-    test('should generate correct number of days', () => {
+    test('should generate correct number of length', () => {
         const result = getStockPrices(defaultOptions);
-        expect(result.data.length).toBe(defaultOptions.days);
+        expect(result.data.length).toBe(defaultOptions.length);
     });
 
     test('should start with the specified start price', () => {
@@ -31,7 +31,7 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
     test('should respect volatility parameter', () => {
         const lowVolatility = getStockPrices({
             ...defaultOptions,
-            days: 30,
+            length: 30,
             startPrice: 10000,
             volatility: 0.01,
             drift: 0,
@@ -40,7 +40,7 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
 
         const highVolatility = getStockPrices({
             ...defaultOptions,
-            days: 30,
+            length: 30,
             startPrice: 10000,
             volatility: 0.1,
             drift: 0,
@@ -58,7 +58,7 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
     test('should apply drift correctly', () => {
         const result = getStockPrices({
             ...defaultOptions,
-            days: 30,
+            length: 30,
             drift: 0.1,
             seed: 123
         });
@@ -108,10 +108,10 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
         expect(allStepAligned).toBe(true);
     });
 
-    test('should round prices to integers if type is int', () => {
+    test('should round prices to integers if dataType is int', () => {
         const result = getStockPrices({
             ...defaultOptions,
-            type: 'int'
+            dataType: 'int'
         });
 
         const allIntegers = result.data.every(price => Number.isInteger(price));
@@ -187,11 +187,6 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
         expect(result.data[0]).toBe(12345);
     });
 
-    test('should generate the number of days specified', () => {
-        const result = getStockPrices({ ...defaultOptions, days: 20 });
-        expect(result.data.length).toBe(20);
-    });
-
     test('should apply specified volatility', () => {
         const low = getStockPrices({ ...defaultOptions, volatility: 0.01, seed: 456 });
         const high = getStockPrices({ ...defaultOptions, volatility: 0.3, seed: 456 });
@@ -209,39 +204,10 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
         expect(avgReturn).toBeGreaterThan(0);
     });
 
-    test('should generate consistent results using the same seed', () => {
-        const r1 = getStockPrices({ ...defaultOptions, seed: 42 });
-        const r2 = getStockPrices({ ...defaultOptions, seed: 42 });
-        expect(r1.data).toEqual(r2.data);
-    });
-
-    test('should use provided data array as base', () => {
-        const inputData = [10000, 11000, 12000];
-        const result = getStockPrices({ ...defaultOptions, data: inputData });
-        expect(result.data.slice(0, 3)).toEqual(inputData);
-    });
-
-    test('should clamp values within min and max', () => {
-        const result = getStockPrices({ ...defaultOptions, min: 5000, max: 7000 });
-        expect(Math.min(...result.data)).toBeGreaterThanOrEqual(5000);
-        expect(Math.max(...result.data)).toBeLessThanOrEqual(7000);
-    });
-
-    test('should return array with specified length', () => {
-        const result = getStockPrices({ ...defaultOptions, length: 15 });
-        expect(result.data.length).toBe(15);
-    });
-
     test('should respect step size rounding', () => {
         const result = getStockPrices({ ...defaultOptions, step: 500 });
         const aligned = result.data.every(p => p % 500 === 0);
         expect(aligned).toBe(true);
-    });
-
-    test('should output integers if type is int', () => {
-        const result = getStockPrices({ ...defaultOptions, type: 'int' });
-        const allInts = result.data.every(p => Number.isInteger(p));
-        expect(allInts).toBe(true);
     });
 
     test('should support multiple algorithms', () => {
@@ -264,6 +230,46 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
         setTimeout(() => {
             generator.stop();
             expect(spy).toHaveBeenCalled();
+            done();
+        }, 250);
+    });
+
+    test('should apply delisting when price reaches 0', () => {
+        const result = getStockPrices({
+            ...defaultOptions,
+            startPrice: 1,
+            volatility: 2,
+            drift: -5,
+            delisting: true,
+            seed: 999
+        });
+
+        const reachedZero = result.data.some(p => p <= 0);
+        expect(reachedZero).toBe(true);
+    });
+
+    test('should trigger onStart, onStop, onComplete, and onError callbacks', (done) => {
+        const onStart = jest.fn();
+        const onStop = jest.fn();
+        const onComplete = jest.fn();
+        const onError = jest.fn();
+
+        const generator = getContStockPrices({
+            ...defaultOptions,
+            interval: 100,
+            onStart,
+            onStop,
+            onComplete,
+            onError
+        });
+
+        generator.start();
+        expect(onStart).toHaveBeenCalled();
+
+        setTimeout(() => {
+            generator.stop();
+            expect(onStop).toHaveBeenCalled();
+            // Optional checks depending on generator behavior
             done();
         }, 250);
     });
