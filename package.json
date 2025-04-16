@@ -41,12 +41,14 @@
   },
   "homepage": "https://github.com/Ruthgyeul/stockPriceGenerator.git#readme",
   "keywords": [
+    "random",
+    "number",
     "stock",
     "price",
     "generator",
     "simulation",
-    "GBM",
     "random-walk",
+    "GBM",
     "finance"
   ],
   "devDependencies": {
