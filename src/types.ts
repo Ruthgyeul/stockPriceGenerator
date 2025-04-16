@@ -8,10 +8,9 @@ export interface StockPriceOptions {
   volatility?: number; // Volatility of the stock price
   drift?: number; // Drift of the stock price
   seed?: number; // Seed for random number generation
-  data?: number[]; // Array of stock prices
   min?: number; // Minimum stock price
   max?: number; // Maximum stock price
-  disa?: boolean; // Keep stock price to 0 if it reaches 0
+  delisting?: boolean; // Keep stock price to 0 if it reaches 0
   step?: number; // Step size for the generated data
   dataType?: DataType; // Type of data to generate (float or int)
   algorithm?: Algorithm; // Algorithm to use for generating stock prices

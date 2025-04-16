@@ -1,8 +1,10 @@
 import type { AlgorithmParams } from './algorithmParams';
 import { seededRandom } from '../seed';
+import { minMaxCheck} from '../minMaxCheck';
+import { killStock } from "../killStock";
 import { outputType } from "../outputType";
 
-export function GBM({ currentPrice, volatility, drift, seed = (Date.now() + new Date().getMilliseconds()), dataType = 'float' }: AlgorithmParams): number {
+export function GBM({ currentPrice, volatility = 0.1, drift = 0.05, seed = (Date.now() + new Date().getMilliseconds()), min = 0, max = 0, delisting = false, dataType = 'float' }: AlgorithmParams): number {
     const dt = 1 / 365;
 
     const u1 = seededRandom(seed);
@@ -14,5 +16,17 @@ export function GBM({ currentPrice, volatility, drift, seed = (Date.now() + new 
         volatility * Math.sqrt(dt) * z
     );
 
-    return outputType(currentPrice * change, dataType);
+    let nextPrice = currentPrice * change;
+
+    // Check if delisting is enabled
+    if (delisting) {
+        // Delisting logic
+        nextPrice = killStock(nextPrice);
+    } else {
+        // Check min and max limits
+        nextPrice = minMaxCheck(min, max, nextPrice);
+    }
+
+    // Output with specified data type
+    return outputType(nextPrice, dataType);
 }

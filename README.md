@@ -1,4 +1,4 @@
-<file name=1 path=README.md># Stock Price Generator
+# Stock Price Generator
 Generates random number for synthetic stock price data using various random algorithm models. The generated data can be used for testing and simulation purposes.
 
 ## Features
@@ -112,24 +112,23 @@ console.log(`Current price: ${generator.getCurrentPrice()}`);
 | `volatility` | No       | number          | 0.1    | Volatility of the stock price (standard deviation of the returns) |
 | `drift`      | No       | number          | 0.05   | The drift of the stock price (mean of the returns)                |
 | `seed`       | No       | number          | DateTime | Seed for random number generation (for reproducibility)           |
-| `data`       | No       | number[]        | []     | Pre-existing array of stock prices                                |
-| `min`        | No       | number          | 0      | Minimum price for the stock                                       |
-| `max`        | No       | number          | 10000  | Maximum price for the stock                                       |
-| `disa`       | No       |boolean|false| Keep stock price to 0, if it reaches to 0                         |
+| `min`        | No       | number          | 0      | Minimum price for the stock (min >= 0)                            |
+| `max`        | No       | number          | 10000  | Maximum price for the stock (max >= 0)                            |
+| `delisting`  | No       |boolean|false| Keep stock price to 0, if it reaches to 0                         |
 | `step`       | No       | number          | -      | Step size for discretization                                      |
 | `dataType`   | No       | float \| int    | float  | Type of the output data type                                      |
 | `algorithm`  | No       | RandomWalk \| GBM | RandomWalk  | Algorithm for generating the random number                        |
 
 ## Handler Functions (only for continuous generation)
 
-| Parameter | Required | Type | Default  | Description                                                               |
-|-----------|----------|------|----------|---------------------------------------------------------------------------|
-| `interval` | Yes      | number | 60000    | Iinterval in milliseconds between price updates in continuous generation  |
-| `onStart` | No       | function | -        | Callback function to handle generator start event                         |
-| `onPrice` | No       | function | -        | Callback function to handle new prices in continuous generation           |
-| `onStop` | No       | function | -        | Callback function to handle generator stop event                          |
-| `onComplete` | No       | function | -        | Callback function to handle generator completion event                    |
-| `onError` | No       | function | -        | Callback function to handle errors in continuous generation               |
+| Parameter | Required | Type | Default  | Description                                                              |
+|-----------|----------|------|----------|--------------------------------------------------------------------------|
+| `interval` | Yes      | number | 60000    | Interval in milliseconds between price updates in continuous generation  |
+| `onStart` | No       | function | -        | Callback function to handle generator start event                        |
+| `onPrice` | No       | function | -        | Callback function to handle new prices in continuous generation          |
+| `onStop` | No       | function | -        | Callback function to handle generator stop event                         |
+| `onComplete` | No       | function | -        | Callback function to handle generator completion event                   |
+| `onError` | No       | function | -        | Callback function to handle errors in continuous generation              |
 
 ## License
 MIT
