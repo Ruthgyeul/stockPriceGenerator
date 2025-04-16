@@ -33,7 +33,11 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
       currentPrice: this.currentPrice,
       volatility,
       drift,
-      seed
+      seed,
+      min: this.options.min ?? 0,
+      max: this.options.max ?? 0,
+      delisting: this.options.delisting ?? false,
+      dataType: this.options.dataType ?? 'float'
     });
   }
 
@@ -86,7 +90,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 }
 
 export function getStockPrices(options: StockPriceOptions): StockPriceResult {
-  const { startPrice, length = 100, algorithm = 'RandomWalk' } = options;
+  const { startPrice, length = 100 } = options;
   const data: number[] = [startPrice];
   let currentPrice = startPrice;
 
