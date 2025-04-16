@@ -52,6 +52,26 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
     }, this.interval);
   }
 
+  pause(): void {
+    if (this.timer) {
+      clearInterval(this.timer);
+      this.timer = null;
+    }
+  }
+
+  continue(): void {
+      if (this.timer) return;
+
+      this.timer = setInterval(() => {
+      try {
+          this.currentPrice = this.generateNextPrice();
+          this.options.onPrice?.(this.currentPrice);
+      } catch (error) {
+          this.options.onError?.(error as Error);
+      }
+      }, this.interval);
+  }
+
   stop(): void {
     if (this.timer) {
       clearInterval(this.timer);
@@ -66,11 +86,11 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 }
 
 export function getStockPrices(options: StockPriceOptions): StockPriceResult {
-  const { startPrice, days = 100, algorithm = 'RandomWalk' } = options;
+  const { startPrice, length = 100, algorithm = 'RandomWalk' } = options;
   const data: number[] = [startPrice];
   let currentPrice = startPrice;
 
-  for (let i = 1; i < days; i++) {
+  for (let i = 1; i < length; i++) {
     const generator = new StockPriceGeneratorImpl({
       ...options,
       startPrice: currentPrice
