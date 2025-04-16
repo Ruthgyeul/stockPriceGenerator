@@ -117,7 +117,7 @@ console.log(`Current price: ${generator.getCurrentPrice()}`);
 | `max`        | No       | number          | 10000  | Maximum price for the stock                                       |
 | `disa`       | No       |boolean|false| Keep stock price to 0, if it reaches to 0                         |
 | `step`       | No       | number          | -      | Step size for discretization                                      |
-| `outputType`       | No       | float \| int    | float  | Type of the output data type                                      |
+| `dataType`   | No       | float \| int    | float  | Type of the output data type                                      |
 | `algorithm`  | No       | RandomWalk \| GBM | RandomWalk  | Algorithm for generating the random number                        |
 
 ## Handler Functions (only for continuous generation)

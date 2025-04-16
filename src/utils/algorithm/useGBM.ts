@@ -1,7 +1,8 @@
 import type { AlgorithmParams } from './algorithmParams';
 import { seededRandom } from '../seed';
+import { outputType } from "../outputType";
 
-export function GBM({ currentPrice, volatility, drift, seed = (Date.now() + new Date().getMilliseconds()) }: AlgorithmParams): number {
+export function GBM({ currentPrice, volatility, drift, seed = (Date.now() + new Date().getMilliseconds()), dataType = 'float' }: AlgorithmParams): number {
     const dt = 1 / 365;
 
     const u1 = seededRandom(seed);
@@ -13,5 +14,5 @@ export function GBM({ currentPrice, volatility, drift, seed = (Date.now() + new 
         volatility * Math.sqrt(dt) * z
     );
 
-    return currentPrice * change;
+    return outputType(currentPrice * change, dataType);
 }
