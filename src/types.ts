@@ -16,7 +16,7 @@ export interface StockPriceOptions {
   algorithm?: Algorithm; // Algorithm to use for generating stock prices
   interval?: number; // Interval for generating stock prices (in milliseconds)
   onStart?: () => void; // Callback for when the generator starts
-  onPrice?: (price: number) => void; // Callback for each generated price
+  onPrice?: (price: number, previousPrice: number | null) => void; // Callback for each generated price
   onStop?: () => void; // Callback for when the generator stops
   onComplete?: () => void; // Callback for when the generator completes
   onError?: (error: Error) => void; // Callback for errors
@@ -25,6 +25,7 @@ export interface StockPriceOptions {
 export interface StockPriceResult {
   data: number[]; // Array of generated stock prices
   price: number; // Current stock price
+  previousPrice?: number; // Previous stock price (optional)
 }
 
 export interface StockPriceGenerator {
@@ -33,4 +34,5 @@ export interface StockPriceGenerator {
   continue: () => void; // Continue generating stock prices
   stop: () => void; // Stop generating stock prices
   getCurrentPrice: () => number; // Get the current stock price
+  getPreviousPrice: () => number | null; // Get the previous stock price
 }

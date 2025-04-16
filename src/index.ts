@@ -4,6 +4,7 @@ import type { Algorithm as AlgorithmType } from './utils/algorithm/algorithms';
 
 class StockPriceGeneratorImpl implements StockPriceGenerator {
   private currentPrice: number; // Current stock price
+  private previousPrice: number | null = null; // Previous stock price
   private readonly interval: number; // Interval in milliseconds
   private timer: ReturnType<typeof setInterval> | null; // Timer ID
   private readonly options: StockPriceOptions; // Options for the generator
@@ -17,6 +18,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
       ...options
     };
     this.currentPrice = options.startPrice;
+    this.previousPrice = null;
     this.interval = this.options.interval || 60000;
     this.timer = null;
   }
@@ -45,6 +47,8 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
       nextPrice = Math.round(nextPrice / step) * step;
     }
 
+    this.previousPrice = this.currentPrice;
+
     return nextPrice;
   }
 
@@ -55,8 +59,9 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
     this.timer = setInterval(() => {
       try {
+        this.previousPrice = this.currentPrice;
         this.currentPrice = this.generateNextPrice();
-        this.options.onPrice?.(this.currentPrice);
+        this.options.onPrice?.(this.currentPrice, this.previousPrice);
       } catch (error) {
         this.options.onError?.(error as Error);
       }
@@ -75,8 +80,9 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
     this.timer = setInterval(() => {
       try {
+        this.previousPrice = this.currentPrice;
         this.currentPrice = this.generateNextPrice();
-        this.options.onPrice?.(this.currentPrice);
+        this.options.onPrice?.(this.currentPrice, this.previousPrice);
       } catch (error) {
         this.options.onError?.(error as Error);
       }
@@ -94,6 +100,10 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
   getCurrentPrice(): number {
     return this.currentPrice;
+  }
+
+  getPreviousPrice(): number | null {
+    return this.previousPrice;
   }
 }
 
@@ -113,7 +123,8 @@ export function getStockPrices(options: StockPriceOptions): StockPriceResult {
 
   return {
     data,
-    price: currentPrice
+    price: currentPrice,
+    previousPrice: data[data.length - 2] ?? null
   };
 }
 
