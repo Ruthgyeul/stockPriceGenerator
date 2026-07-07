@@ -1,14 +1,48 @@
-import type { StockPriceOptions, StockPriceResult, StockPriceGenerator } from './types';
+import type { StockPriceOptions, StockPriceResult, StockPriceGenerator, DataType } from './types';
 import { algorithms } from './utils/algorithm/algorithms';
 import type { Algorithm as AlgorithmType } from './utils/algorithm/algorithms';
 import { minMaxCheck } from './utils/minMaxCheck';
 import { killStock } from './utils/killStock';
+
+interface NextPriceParams {
+  currentPrice: number;
+  volatility: number;
+  drift: number;
+  algorithm: AlgorithmType;
+  seed?: number;
+  min: number;
+  max: number;
+  delisting: boolean;
+  dataType: DataType;
+  step?: number;
+}
+
+// Single source of truth for "what's the next price" used by both the one-shot
+// array generator and the continuous generator, so the two APIs can't drift apart.
+function computeNextPrice(params: NextPriceParams): number {
+  const { currentPrice, volatility, drift, algorithm, seed, min, max, delisting, dataType, step } = params;
+
+  if (volatility < 0) {
+    throw new Error('Volatility must be a non-negative number');
+  }
+
+  const selectedAlgorithm = algorithms[algorithm];
+  let nextPrice = selectedAlgorithm({ currentPrice, volatility, drift, seed, min, max, delisting, dataType });
+
+  // Apply step size discretization if specified
+  if (step && step > 0) {
+    nextPrice = Math.round(nextPrice / step) * step;
+  }
+
+  return nextPrice;
+}
 
 class StockPriceGeneratorImpl implements StockPriceGenerator {
   private currentPrice: number; // Current stock price
   private readonly interval: number; // Interval in milliseconds
   private timer: ReturnType<typeof setInterval> | null; // Timer ID
   private readonly options: StockPriceOptions; // Options for the generator
+  private tick: number; // Number of prices generated so far, used to advance the seed
 
   constructor(options: StockPriceOptions) {
     this.options = {
@@ -18,42 +52,49 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
       interval: 60000,
       ...options
     };
-    this.currentPrice = options.startPrice;
+
+    const { min = 0, max = 0, delisting = false } = this.options;
+    this.currentPrice = delisting
+      ? killStock(this.options.startPrice)
+      : minMaxCheck(min, max, this.options.startPrice);
     this.interval = this.options.interval || 60000;
     this.timer = null;
+    this.tick = 0;
   }
 
   generateNextPrice(): number {
-    const { volatility = 0.1, drift = 0.05, algorithm = 'RandomWalk', seed, step } = this.options;
+    const {
+      volatility = 0.1,
+      drift = 0.05,
+      algorithm = 'RandomWalk',
+      seed,
+      step,
+      min = 0,
+      max = 0,
+      delisting = false,
+      dataType = 'float'
+    } = this.options;
 
-    if (volatility < 0) {
-      throw new Error('Volatility must be a non-negative number');
-    }
+    // Advance the seed every tick; otherwise a fixed seed would make every
+    // continuous tick resolve to the exact same "random" draw forever.
+    this.tick += 1;
 
-    const selectedAlgorithm = algorithms[algorithm as AlgorithmType];
-    let nextPrice = selectedAlgorithm({
+    return computeNextPrice({
       currentPrice: this.currentPrice,
       volatility,
       drift,
-      seed,
-      min: this.options.min ?? 0,
-      max: this.options.max ?? 0,
-      delisting: this.options.delisting ?? false,
-      dataType: this.options.dataType ?? 'float'
+      algorithm: algorithm as AlgorithmType,
+      seed: seed !== undefined ? seed + this.tick : undefined,
+      min,
+      max,
+      delisting,
+      dataType,
+      step
     });
-
-    // Apply step size discretization if specified
-    if (step && step > 0) {
-      nextPrice = Math.round(nextPrice / step) * step;
-    }
-
-    return nextPrice;
   }
 
-  start(): void {
+  private runTimer(): void {
     if (this.timer) return;
-
-    this.options.onStart?.();
 
     this.timer = setInterval(() => {
       try {
@@ -63,6 +104,12 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
         this.options.onError?.(error as Error);
       }
     }, this.interval);
+  }
+
+  start(): void {
+    if (this.timer) return;
+    this.options.onStart?.();
+    this.runTimer();
   }
 
   pause(): void {
@@ -73,16 +120,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
   }
 
   continue(): void {
-    if (this.timer) return;
-
-    this.timer = setInterval(() => {
-      try {
-        this.currentPrice = this.generateNextPrice();
-        this.options.onPrice?.(this.currentPrice);
-      } catch (error) {
-        this.options.onError?.(error as Error);
-      }
-    }, this.interval);
+    this.runTimer();
   }
 
   stop(): void {
@@ -100,17 +138,36 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 }
 
 export function getStockPrices(options: StockPriceOptions): StockPriceResult {
-  const { startPrice, length = 100, seed, min = 0, max = 0, delisting = false } = options;
+  const {
+    startPrice,
+    length = 100,
+    volatility = 0.1,
+    drift = 0.05,
+    algorithm = 'RandomWalk',
+    seed,
+    min = 0,
+    max = 0,
+    delisting = false,
+    dataType = 'float',
+    step
+  } = options;
+
   let currentPrice = delisting ? killStock(startPrice) : minMaxCheck(min, max, startPrice);
   const data: number[] = [currentPrice];
 
   for (let i = 1; i < length; i++) {
-    const generator = new StockPriceGeneratorImpl({
-      ...options,
-      startPrice: currentPrice,
-      seed: seed !== undefined ? seed + i : undefined
+    currentPrice = computeNextPrice({
+      currentPrice,
+      volatility,
+      drift,
+      algorithm: algorithm as AlgorithmType,
+      seed: seed !== undefined ? seed + i : undefined,
+      min,
+      max,
+      delisting,
+      dataType,
+      step
     });
-    currentPrice = generator.generateNextPrice();
     data.push(currentPrice);
   }
 

@@ -1,4 +1,4 @@
-export type DataType = 'float' | 'int';
+import type { DataType } from '../../types';
 
 export interface AlgorithmParams {
     currentPrice: number; // Current stock price
