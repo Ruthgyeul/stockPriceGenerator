@@ -14,13 +14,15 @@ export function minMaxCheck(min : number, max: number, price : number) {
         const minMax = Math.random() * 0.1 + 0.001;
         const calc = price * minMax;
 
+        let adjusted = price;
         if (price < min) {
-            return adjustMinLogic(price, calc, mainDice, dice0, dice1, dice2, dice3, dice4, dice5, dice6);
+            adjusted = adjustMinLogic(price, calc, mainDice, dice0, dice1, dice2, dice3, dice4, dice5, dice6);
         } else if (price > max) {
-            return adjustMaxLogic(price, calc, mainDice, dice0, dice1, dice2, dice3, dice4, dice5, dice6);
-        } else {
-            return price;
+            adjusted = adjustMaxLogic(price, calc, mainDice, dice0, dice1, dice2, dice3, dice4, dice5, dice6);
         }
+
+        // Guarantee the result never leaves the requested bounds, even if the nudge above wasn't enough
+        return Math.min(Math.max(adjusted, min), max);
     }
 }
 
