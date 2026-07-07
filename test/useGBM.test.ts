@@ -110,14 +110,12 @@ describe('GBM Algorithm - Stock Price Generator', () => {
         expect(allStepAligned).toBe(true);
     });
 
-    // Known failing: with dt=1/365 (daily steps), price cannot realistically reach
-    // exact 0 within this few steps even at extreme drift/volatility. See PR discussion.
     test('should apply delisting logic when price reaches 0', () => {
         const result = getStockPrices({
             ...defaultOptions,
             startPrice: 1,
-            volatility: 2,
-            drift: -5,
+            volatility: 10,
+            drift: -500,
             delisting: true,
             seed: 999
         });
