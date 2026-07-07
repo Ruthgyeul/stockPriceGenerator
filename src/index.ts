@@ -1,6 +1,8 @@
 import type { StockPriceOptions, StockPriceResult, StockPriceGenerator } from './types';
 import { algorithms } from './utils/algorithm/algorithms';
 import type { Algorithm as AlgorithmType } from './utils/algorithm/algorithms';
+import { minMaxCheck } from './utils/minMaxCheck';
+import { killStock } from './utils/killStock';
 
 class StockPriceGeneratorImpl implements StockPriceGenerator {
   private currentPrice: number; // Current stock price
@@ -98,14 +100,15 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 }
 
 export function getStockPrices(options: StockPriceOptions): StockPriceResult {
-  const { startPrice, length = 100, step } = options;
-  const data: number[] = [startPrice];
-  let currentPrice = startPrice;
+  const { startPrice, length = 100, seed, min = 0, max = 0, delisting = false } = options;
+  let currentPrice = delisting ? killStock(startPrice) : minMaxCheck(min, max, startPrice);
+  const data: number[] = [currentPrice];
 
   for (let i = 1; i < length; i++) {
     const generator = new StockPriceGeneratorImpl({
       ...options,
-      startPrice: currentPrice
+      startPrice: currentPrice,
+      seed: seed !== undefined ? seed + i : undefined
     });
     currentPrice = generator.generateNextPrice();
     data.push(currentPrice);
