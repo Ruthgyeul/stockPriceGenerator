@@ -8,6 +8,9 @@ Generates random number for synthetic stock price data using various random algo
 - Configurable parameters for volatility, drift, and more
 - Support for both ES Modules (import/export), CommonJS (require), and TypeScript
 
+## Requirements
+- Node.js 22.x or 24.x (active/maintenance LTS releases)
+
 ## Installation
 
 ```bash
@@ -129,6 +132,9 @@ console.log(`Current price: ${generator.getCurrentPrice()}`);
 | `onStop` | No       | function | -        | Callback function to handle generator stop event                         |
 | `onComplete` | No       | function | -        | Callback function to handle generator completion event                   |
 | `onError` | No       | function | -        | Callback function to handle errors in continuous generation              |
+
+## Security
+This project has no runtime dependencies, and development dependencies are kept up to date and regularly audited with `npm audit`. If you discover a security issue, please open an issue on GitHub.
 
 ## License
 MIT
