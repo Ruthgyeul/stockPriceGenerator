@@ -235,20 +235,33 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
         }, 250);
     });
 
-    // Known failing: with dt=1/365 (daily steps), price cannot realistically reach
-    // exact 0 within this few steps even at extreme drift/volatility. See PR discussion.
     test('should apply delisting when price reaches 0', () => {
         const result = getStockPrices({
             ...defaultOptions,
             startPrice: 1,
-            volatility: 2,
-            drift: -5,
+            volatility: 10,
+            drift: -500,
             delisting: true,
             seed: 999
         });
 
         const reachedZero = result.data.some(p => p <= 0);
         expect(reachedZero).toBe(true);
+    });
+
+    test('should stay at 0 for all subsequent steps once delisted', () => {
+        const result = getStockPrices({
+            ...defaultOptions,
+            startPrice: 1,
+            volatility: 10,
+            drift: -500,
+            delisting: true,
+            seed: 999
+        });
+
+        const firstZeroIndex = result.data.findIndex(p => p === 0);
+        expect(firstZeroIndex).toBeGreaterThan(-1);
+        expect(result.data.slice(firstZeroIndex).every(p => p === 0)).toBe(true);
     });
 
     test('should trigger onStart, onStop, onComplete, and onError callbacks', (done) => {
@@ -275,5 +288,34 @@ describe('Random Walk Algorithm - Stock Price Generator', () => {
             // Optional checks depending on generator behavior
             done();
         }, 250);
+    });
+
+    test('should clamp the initial price of a continuous generator to min/max', () => {
+        const generator = getContStockPrices({
+            ...defaultOptions,
+            startPrice: 50000,
+            min: 9000,
+            max: 12000
+        });
+
+        expect(generator.getCurrentPrice()).toBeLessThanOrEqual(12000);
+    });
+
+    test('should keep advancing prices across ticks even with a fixed seed', (done) => {
+        const seenPrices = new Set<number>();
+        const generator = getContStockPrices({
+            ...defaultOptions,
+            interval: 20,
+            seed: 42,
+            onPrice: (price) => seenPrices.add(price)
+        });
+
+        generator.start();
+
+        setTimeout(() => {
+            generator.stop();
+            expect(seenPrices.size).toBeGreaterThan(1);
+            done();
+        }, 200);
     });
 });

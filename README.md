@@ -106,6 +106,59 @@ console.log(`Current price: ${generator.getCurrentPrice()}`);
 // generator.stop();
 ```
 
+## Examples
+
+### Bounded price walk (min/max)
+```javascript
+import { getStockPrices } from 'stockprice-generator';
+
+// Price is kept within [9000, 11000] for the whole series
+const result = getStockPrices({
+    startPrice: 10000,
+    length: 100,
+    min: 9000,
+    max: 11000
+});
+```
+
+### GBM with delisting
+```javascript
+import { getStockPrices } from 'stockprice-generator';
+
+// If the price collapses to a near-zero threshold, it is forced to (and stays at) 0
+const result = getStockPrices({
+    startPrice: 100,
+    length: 250,
+    algorithm: 'GBM',
+    drift: -2,
+    volatility: 1.5,
+    delisting: true
+});
+```
+
+### Reproducible series with a seed
+```javascript
+import { getStockPrices } from 'stockprice-generator';
+
+// Same seed always produces the same series
+const a = getStockPrices({ startPrice: 10000, length: 50, seed: 42 });
+const b = getStockPrices({ startPrice: 10000, length: 50, seed: 42 });
+// a.data and b.data are identical
+```
+
+### Discretized integer prices (step + dataType)
+```javascript
+import { getStockPrices } from 'stockprice-generator';
+
+// Prices are rounded to the nearest multiple of 50 and returned as integers
+const result = getStockPrices({
+    startPrice: 10000,
+    length: 100,
+    step: 50,
+    dataType: 'int'
+});
+```
+
 ## Parameters
 
 | Parameter    | Required | Type            | Default | Description                                                       |
@@ -115,12 +168,14 @@ console.log(`Current price: ${generator.getCurrentPrice()}`);
 | `volatility` | No       | number          | 0.1    | Volatility of the stock price (standard deviation of the returns) |
 | `drift`      | No       | number          | 0.05   | The drift of the stock price (mean of the returns)                |
 | `seed`       | No       | number          | DateTime | Seed for random number generation (for reproducibility)           |
-| `min`        | No       | number          | 0      | Minimum price for the stock (min >= 0)                            |
-| `max`        | No       | number          | 10000  | Maximum price for the stock (max >= 0)                            |
-| `delisting`  | No       |boolean|false| Keep stock price to 0, if it reaches to 0                         |
+| `min`        | No       | number          | 0      | Minimum price for the stock (0 = unlimited)                       |
+| `max`        | No       | number          | 0      | Maximum price for the stock (0 = unlimited)                       |
+| `delisting`  | No       |boolean|false| Force the price to 0 once it falls to or below a near-zero threshold |
 | `step`       | No       | number          | -      | Step size for discretization                                      |
 | `dataType`   | No       | float \| int    | float  | Type of the output data type                                      |
 | `algorithm`  | No       | RandomWalk \| GBM | RandomWalk  | Algorithm for generating the random number                        |
+
+> `min` and `max` only take effect when at least one of them is non-zero; leaving both at the default `0` means no bounds are enforced.
 
 ## Handler Functions (only for continuous generation)
 
