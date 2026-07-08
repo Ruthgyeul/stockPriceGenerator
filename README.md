@@ -6,6 +6,7 @@ Generates random number for synthetic stock price data using various random algo
 - Create continuous stock price generators with configurable intervals
 - Support for various random algorithms (Random Walk, GBM, etc.)
 - Configurable parameters for volatility, drift, and more
+- Track both the current and previous price via `getPreviousPrice()` / `result.previousPrice` / the `onPrice` callback
 - Support for both ES Modules (import/export), CommonJS (require), and TypeScript
 
 ## Requirements
@@ -65,16 +66,17 @@ const generator = getContStockPrices({
     drift: 0.05,
     algorithm: 'RandomWalk',
     interval: 60000, // 60 seconds
-    onPrice: (price) => {
-        console.log(`New price: ${price}`);
+    onPrice: (price, previousPrice) => {
+        console.log(`New price: ${price} (was ${previousPrice})`);
     }
 });
 
 // Start the generator
 generator.start();
 
-// Get the current price
+// Get the current and previous price
 console.log(`Current price: ${generator.getCurrentPrice()}`);
+console.log(`Previous price: ${generator.getPreviousPrice()}`);
 
 // Stop the generator when done
 // generator.stop();
@@ -91,16 +93,17 @@ const generator = getStockPrices({
     drift: 0.05,
     algorithm: 'RandomWalk',
     interval: 60000, // 60 seconds
-    onPrice: (price: number) => {
-        console.log(`New price: ${price}`);
+    onPrice: (price: number, previousPrice: number | null) => {
+        console.log(`New price: ${price} (was ${previousPrice})`);
     }
 });
 
 // Start the generator
 generator.start();
 
-// Get the current price
+// Get the current and previous price
 console.log(`Current price: ${generator.getCurrentPrice()}`);
+console.log(`Previous price: ${generator.getPreviousPrice()}`);
 
 // Stop the generator when done
 // generator.stop();
@@ -183,7 +186,7 @@ const result = getStockPrices({
 |-----------|----------|------|----------|--------------------------------------------------------------------------|
 | `interval` | Yes      | number | 60000    | Interval in milliseconds between price updates in continuous generation  |
 | `onStart` | No       | function | -        | Callback function to handle generator start event                        |
-| `onPrice` | No       | function | -        | Callback function to handle new prices in continuous generation          |
+| `onPrice` | No       | `(price: number, previousPrice: number \| null) => void` | -        | Callback function to handle new prices in continuous generation. `previousPrice` is `null` on the very first tick |
 | `onStop` | No       | function | -        | Callback function to handle generator stop event                         |
 | `onComplete` | No       | function | -        | Callback function to handle generator completion event                   |
 | `onError` | No       | function | -        | Callback function to handle errors in continuous generation              |
