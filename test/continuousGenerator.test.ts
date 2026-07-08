@@ -84,4 +84,41 @@ describe('Continuous generator - determinism and validation', () => {
         expect(() => generator.continue()).not.toThrow();
         generator.stop();
     });
+
+    test('does not schedule the next tick until a slow onPrice callback returns', (done) => {
+        const tickTimestamps: number[] = [];
+        const slowTickInterval = 30;
+        const onPriceDelay = 80; // longer than the interval, so overlap would show up as bunched-up timestamps
+
+        const generator = getContStockPrices({
+            ...baseOptions,
+            interval: slowTickInterval,
+            onPrice: () => {
+                tickTimestamps.push(Date.now());
+                // Busy-wait synchronously to simulate slow (blocking) work in onPrice.
+                const until = Date.now() + onPriceDelay;
+                while (Date.now() < until) {
+                    /* noop */
+                }
+            }
+        });
+
+        generator.start();
+
+        setTimeout(() => {
+            generator.stop();
+
+            expect(tickTimestamps.length).toBeGreaterThanOrEqual(2);
+
+            for (let i = 1; i < tickTimestamps.length; i++) {
+                const gap = tickTimestamps[i] - tickTimestamps[i - 1];
+                // Each tick should wait for the previous onPrice to finish before the next
+                // interval starts counting down, so consecutive ticks can't land closer
+                // together than onPrice's own blocking time.
+                expect(gap).toBeGreaterThanOrEqual(onPriceDelay);
+            }
+
+            done();
+        }, onPriceDelay * 3 + 100);
+    });
 });

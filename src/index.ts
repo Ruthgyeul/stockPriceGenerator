@@ -77,7 +77,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
   private currentPrice: number; // Current stock price
   private previousPrice: number | null; // Price before the current one
   private readonly interval: number; // Interval in milliseconds
-  private timer: ReturnType<typeof setInterval> | null; // Timer ID
+  private timer: ReturnType<typeof setTimeout> | null; // Timer ID
   private readonly options: StockPriceOptions; // Options for the generator
   private tick: number; // Number of prices generated so far, used to advance the seed
 
@@ -143,10 +143,13 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
     });
   }
 
+  // A recursive setTimeout is used instead of setInterval so each tick is scheduled
+  // relative to when the previous one actually finished, avoiding both long-run drift
+  // and pile-ups if a tick (or the event loop) is delayed.
   private runTimer(): void {
     if (this.timer) return;
 
-    this.timer = setInterval(() => {
+    const tick = (): void => {
       try {
         const nextPrice = this.generateNextPrice();
         this.previousPrice = this.currentPrice;
@@ -155,7 +158,10 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
       } catch (error) {
         this.options.onError?.(error as Error);
       }
-    }, this.interval);
+      this.timer = setTimeout(tick, this.interval);
+    };
+
+    this.timer = setTimeout(tick, this.interval);
   }
 
   start(): void {
@@ -166,7 +172,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
   pause(): void {
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = null;
     }
   }
@@ -177,7 +183,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
   stop(): void {
     if (this.timer) {
-      clearInterval(this.timer);
+      clearTimeout(this.timer);
       this.timer = null;
       this.options.onStop?.();
       this.options.onComplete?.();
