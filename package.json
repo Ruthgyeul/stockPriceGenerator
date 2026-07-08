@@ -25,6 +25,7 @@
     "build:test": "npm run build && jest",
     "test": "jest",
     "test:w": "jest --watch",
+    "commitlint": "commitlint --from HEAD~1 --to HEAD",
     "prepare": "npm run build"
   },
   "repository": {
@@ -49,6 +50,8 @@
     "finance"
   ],
   "devDependencies": {
+    "@commitlint/cli": "^21.2.0",
+    "@commitlint/config-conventional": "^21.2.0",
     "@types/jest": "^30.0.0",
     "@types/node": "^22.15.0",
     "jest": "^30.4.2",
