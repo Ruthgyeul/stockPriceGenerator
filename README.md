@@ -232,6 +232,9 @@ const result = getStockPrices({
 | `onComplete` | No       | function | -        | Callback function to handle generator completion event                   |
 | `onError` | No       | function | -        | Callback function to handle errors in continuous generation              |
 
+## Contributing
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for branch naming, commit message conventions, and the release process.
+
 ## Security
 This project has no runtime dependencies, and development dependencies are kept up to date and regularly audited with `npm audit`. If you discover a security issue, please open an issue on GitHub.
 
