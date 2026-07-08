@@ -47,6 +47,8 @@
     "simulation",
     "random-walk",
     "GBM",
+    "ornstein-uhlenbeck",
+    "jump-diffusion",
     "finance"
   ],
   "devDependencies": {
