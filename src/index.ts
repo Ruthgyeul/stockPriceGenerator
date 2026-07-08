@@ -39,6 +39,7 @@ function computeNextPrice(params: NextPriceParams): number {
 
 class StockPriceGeneratorImpl implements StockPriceGenerator {
   private currentPrice: number; // Current stock price
+  private previousPrice: number | null; // Price before the current one
   private readonly interval: number; // Interval in milliseconds
   private timer: ReturnType<typeof setInterval> | null; // Timer ID
   private readonly options: StockPriceOptions; // Options for the generator
@@ -57,6 +58,7 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
     this.currentPrice = delisting
       ? killStock(this.options.startPrice)
       : minMaxCheck(min, max, this.options.startPrice);
+    this.previousPrice = null;
     this.interval = this.options.interval || 60000;
     this.timer = null;
     this.tick = 0;
@@ -98,8 +100,10 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
     this.timer = setInterval(() => {
       try {
-        this.currentPrice = this.generateNextPrice();
-        this.options.onPrice?.(this.currentPrice);
+        const nextPrice = this.generateNextPrice();
+        this.previousPrice = this.currentPrice;
+        this.currentPrice = nextPrice;
+        this.options.onPrice?.(this.currentPrice, this.previousPrice);
       } catch (error) {
         this.options.onError?.(error as Error);
       }
@@ -134,6 +138,10 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 
   getCurrentPrice(): number {
     return this.currentPrice;
+  }
+
+  getPreviousPrice(): number | null {
+    return this.previousPrice;
   }
 }
 
@@ -173,7 +181,8 @@ export function getStockPrices(options: StockPriceOptions): StockPriceResult {
 
   return {
     data,
-    price: currentPrice
+    price: currentPrice,
+    previousPrice: data.length > 1 ? data[data.length - 2] : undefined
   };
 }
 
