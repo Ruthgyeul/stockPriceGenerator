@@ -3,6 +3,7 @@ import { algorithms } from './utils/algorithm/algorithms';
 import type { Algorithm as AlgorithmType } from './utils/algorithm/algorithms';
 import { minMaxCheck } from './utils/minMaxCheck';
 import { killStock } from './utils/killStock';
+import { validateOptions } from './utils/validateOptions';
 
 interface NextPriceParams {
   currentPrice: number;
@@ -46,6 +47,8 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
   private tick: number; // Number of prices generated so far, used to advance the seed
 
   constructor(options: StockPriceOptions) {
+    validateOptions(options);
+
     this.options = {
       volatility: 0.1,
       drift: 0.05,
@@ -146,6 +149,8 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
 }
 
 export function getStockPrices(options: StockPriceOptions): StockPriceResult {
+  validateOptions(options);
+
   const {
     startPrice,
     length = 100,
