@@ -149,6 +149,36 @@ const b = getStockPrices({ startPrice: 10000, length: 50, seed: 42 });
 // a.data and b.data are identical
 ```
 
+### Mean-reverting series (OU)
+```javascript
+import { getStockPrices } from 'stockprice-generator';
+
+// The price drifts back toward longTermMean instead of wandering freely
+const result = getStockPrices({
+    startPrice: 10000,
+    length: 250,
+    algorithm: 'OU',
+    longTermMean: 9500,
+    reversionSpeed: 0.5,
+    volatility: 0.2
+});
+```
+
+### Jump-diffusion series (sudden spikes/crashes)
+```javascript
+import { getStockPrices } from 'stockprice-generator';
+
+// Standard GBM diffusion plus occasional jumps
+const result = getStockPrices({
+    startPrice: 10000,
+    length: 250,
+    algorithm: 'JumpDiffusion',
+    jumpIntensity: 5,
+    jumpMean: 0,
+    jumpVolatility: 0.3
+});
+```
+
 ### Discretized integer prices (step + dataType)
 ```javascript
 import { getStockPrices } from 'stockprice-generator';
@@ -176,9 +206,20 @@ const result = getStockPrices({
 | `delisting`  | No       |boolean|false| Force the price to 0 once it falls to or below a near-zero threshold |
 | `step`       | No       | number          | -      | Step size for discretization                                      |
 | `dataType`   | No       | float \| int    | float  | Type of the output data type                                      |
-| `algorithm`  | No       | RandomWalk \| GBM | RandomWalk  | Algorithm for generating the random number                        |
+| `algorithm`  | No       | RandomWalk \| GBM \| OU \| JumpDiffusion | RandomWalk  | Algorithm for generating the random number                |
+| `longTermMean` | No     | number          | `startPrice` | `OU` only: the level the price reverts toward                |
+| `reversionSpeed` | No   | number          | 0.15   | `OU` only: how strongly the price is pulled back toward `longTermMean` |
+| `jumpIntensity` | No    | number          | 1      | `JumpDiffusion` only: expected number of jumps per year               |
+| `jumpMean`   | No       | number          | 0      | `JumpDiffusion` only: mean log-size of a jump                     |
+| `jumpVolatility` | No   | number          | 0.1    | `JumpDiffusion` only: volatility of the jump log-size             |
 
 > `min` and `max` only take effect when at least one of them is non-zero; leaving both at the default `0` means no bounds are enforced.
+
+## Algorithms
+- **RandomWalk**: simple random walk with drift and volatility
+- **GBM**: Geometric Brownian Motion, the standard continuous-time model for stock prices
+- **OU**: Ornstein-Uhlenbeck, a mean-reverting model that pulls the price back toward `longTermMean`
+- **JumpDiffusion**: Merton jump-diffusion — GBM plus occasional Poisson-driven jumps for spikes/crashes
 
 ## Handler Functions (only for continuous generation)
 

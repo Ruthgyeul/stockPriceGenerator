@@ -16,19 +16,54 @@ interface NextPriceParams {
   delisting: boolean;
   dataType: DataType;
   step?: number;
+  longTermMean?: number;
+  reversionSpeed?: number;
+  jumpIntensity?: number;
+  jumpMean?: number;
+  jumpVolatility?: number;
 }
 
 // Single source of truth for "what's the next price" used by both the one-shot
 // array generator and the continuous generator, so the two APIs can't drift apart.
 function computeNextPrice(params: NextPriceParams): number {
-  const { currentPrice, volatility, drift, algorithm, seed, min, max, delisting, dataType, step } = params;
+  const {
+    currentPrice,
+    volatility,
+    drift,
+    algorithm,
+    seed,
+    min,
+    max,
+    delisting,
+    dataType,
+    step,
+    longTermMean,
+    reversionSpeed,
+    jumpIntensity,
+    jumpMean,
+    jumpVolatility
+  } = params;
 
   if (volatility < 0) {
     throw new Error('Volatility must be a non-negative number');
   }
 
   const selectedAlgorithm = algorithms[algorithm];
-  let nextPrice = selectedAlgorithm({ currentPrice, volatility, drift, seed, min, max, delisting, dataType });
+  let nextPrice = selectedAlgorithm({
+    currentPrice,
+    volatility,
+    drift,
+    seed,
+    min,
+    max,
+    delisting,
+    dataType,
+    longTermMean,
+    reversionSpeed,
+    jumpIntensity,
+    jumpMean,
+    jumpVolatility
+  });
 
   // Apply step size discretization if specified
   if (step && step > 0) {
@@ -77,7 +112,12 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
       min = 0,
       max = 0,
       delisting = false,
-      dataType = 'float'
+      dataType = 'float',
+      longTermMean,
+      reversionSpeed,
+      jumpIntensity,
+      jumpMean,
+      jumpVolatility
     } = this.options;
 
     // Advance the seed every tick; otherwise a fixed seed would make every
@@ -94,7 +134,12 @@ class StockPriceGeneratorImpl implements StockPriceGenerator {
       max,
       delisting,
       dataType,
-      step
+      step,
+      longTermMean: longTermMean ?? this.options.startPrice,
+      reversionSpeed,
+      jumpIntensity,
+      jumpMean,
+      jumpVolatility
     });
   }
 
@@ -162,7 +207,12 @@ export function getStockPrices(options: StockPriceOptions): StockPriceResult {
     max = 0,
     delisting = false,
     dataType = 'float',
-    step
+    step,
+    longTermMean,
+    reversionSpeed,
+    jumpIntensity,
+    jumpMean,
+    jumpVolatility
   } = options;
 
   let currentPrice = delisting ? killStock(startPrice) : minMaxCheck(min, max, startPrice);
@@ -179,7 +229,12 @@ export function getStockPrices(options: StockPriceOptions): StockPriceResult {
       max,
       delisting,
       dataType,
-      step
+      step,
+      longTermMean: longTermMean ?? startPrice,
+      reversionSpeed,
+      jumpIntensity,
+      jumpMean,
+      jumpVolatility
     });
     data.push(currentPrice);
   }
